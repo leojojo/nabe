@@ -2,30 +2,30 @@ var images = {};
 var context = document.getElementById('canvas').getContext("2d");
 var charX = 450;
 var charY = 400;
-var totalResources = 4;
-var numResourcesLoaded = 0;
+var totalResources = 5;
+var loadedCounter = 0;
 var fps = 30;
 
-var isMouseDown = false;
-var lastX = 0;
-var lastY = 0;
-var canvasOffset = $("#canvas").offset();
-var offsetX = canvasOffset.left;
-var offsetY = canvasOffset.top;
+var srcs = [
+  "tofu",
+  "carrot",
+  "meat",
+  "onion",
+  "mushroom"
+];
 
-function loadImage(name) {
-  images[name] = new Image();
-  images[name].onload = function() { 
-    resourceLoaded();
-  }
-  images[name].src = "images/" + name + ".png";
-}
+var isDragging = false;
 
-function resourceLoaded() {
-  numResourcesLoaded += 1;
-  if(numResourcesLoaded === totalResources) {
-    setInterval(redraw, 1000 / fps);
+for (i in srcs){
+  images[i] = new Image();
+  images[i].onload = function() { 
+    loadedCounter += 1;
+    if(loadedCounter === totalResources) {
+      setInterval(redraw, 1000 / fps);
+    }
   }
+  images[i].src = "images/" + srcs[i] + ".png";
+  console.log(i + srcs[i] + images[i].src);
 }
 
 function drawSoup(centerX, centerY, width, height) {
@@ -48,71 +48,86 @@ function redraw() {
   var x = charX;
   var y = charY;
 
-  canvas.width = canvas.width; // clears the canvas 
+  canvas.width = canvas.width;  // clears the canvas 
 
   context.canvas.width = window.innerWidth;
   context.canvas.height = window.innerHeight;
 
-  drawSoup(canvas.width/2, canvas.height/2, 1200, 600);
-  context.drawImage(images["tofu"], x + 40, y - 42);
-  context.drawImage(images["carrot"], x, y);
-  context.drawImage(images["mushroom"], x, y - 50);
-  context.drawImage(images["meat"], x - 15, y - 42);
-}
-
-function getMousePos(canvas, e) {
-  var rect = canvas.getBoundingClientRect();
-  return {
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top
-  };
-}
-
-function onDown(e) {
-  if ( !_touch ) {
-    canvas.addEventListener( "mousemove", onMove, false );
-    canvas.addEventListener( "mouseout", onUp, false );
-    document.body.style.cssText = "cursor: move";
-  }  else {
-    canvas.addEventListener( "touchmove", onMove, false );
-  }
-  mouseX = parseInt(e.clientX - offsetX);
-  mouseY = parseInt(e.clientY - offsetY);
-  lastX = mouseX;
-  lastY = mouseY;
-  isMouseDown = true;
-}
-
-function onUp(e){
-  if ( !_touch ) {
-    canvas.removeEventListener( "mousemove", onDown );
-    canvas.removeEventListener( "mouseout", onUp );
-    document.body.style.cssText = "cursor: auto";
-
-    canvas.addEventListener( "mousedown", onDown, false );
-    canvas.addEventListener( "mouseup", onUp, false );
-  } else {
-    canvas.removeEventListener( "touchmove", onMove );
-
-    canvas.addEventListener( "touchstart", onDown, false );
-    canvas.addEventListener( "touchend", onUp, false );
-  }
-
-  mouseX = parseInt(e.clientX - offsetX);
-  mouseY = parseInt(e.clientY - offsetY);
-  isMouseDown = false;
-}
-
-function onMove ( e ) {
-  var v;
-  if ( !!target ) {
-    v = new Sankaku.Vector2D( e.pageX - canvas.offsetLeft, e.pageY - canvas.offsetTop );
-    target.setX( v.x - offset.x );
-    target.setY( v.y - offset.y );
+  drawSoup(canvas.width/5*2, canvas.height/2, 1200, 600);
+  for (i in images){
+    context.drawImage(images[i], canvas.width/5*4, canvas.height/6*i);
   }
 }
 
-loadImage("tofu");
-loadImage("carrot");
-loadImage("mushroom");
-loadImage("meat");
+/*
+// ドラッグ開始
+var mouseDown = function(e) {
+  // ドラッグ開始位置
+  var posX = parseInt(e.clientX - canvas.offsetLeft);
+  var posY = parseInt(e.clientY - canvas.offsetTop);
+
+  for (var i = images.length - 1; i >= 0; i--) {
+    // 当たり判定（ドラッグした位置が画像の範囲内に収まっているか）
+    if (posX >= images[i].drawOffsetX &&
+        posX <= (images[i].drawOffsetX + images[i].drawWidth) &&
+        posY >= images[i].drawOffsetY &&
+        posY <= (images[i].drawOffsetY + images[i].drawHeight)
+       ) {
+      dragTarget = i;
+      isDragging = true;
+      break;
+    }
+  }
+}
+
+// ドラッグ終了
+var mouseUp = function(e) {
+  isDragging = false;
+};
+
+// canvasの枠から外れた
+var mouseOut = function(e) {
+  mouseUp(e);
+}
+
+// ドラッグ中
+var mouseMove = function(e) {
+  // ドラッグ終了位置
+  var posX = parseInt(e.clientX - canvas.offsetLeft);
+  var posY = parseInt(e.clientY - canvas.offsetTop);
+
+  if (isDragging) {
+    // canvas内を一旦クリア
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    var x = 0;
+    var y = 0;
+    for (var i in images) {
+      if (i == dragTarget) {
+        x = posX - images[i].drawWidth / 2;
+        y = posY - images[i].drawHeight / 2;
+
+        // ドラッグが終了した時の情報を記憶
+        images[i].drawOffsetX = x;
+        images[i].drawOffsetY = y;
+      } else {
+        x = images[i].drawOffsetX;
+        y = images[i].drawOffsetY;
+      }
+
+      // 画像を描画
+      context.drawImage(images["tofu"], canvas.width/5*4, canvas.height/6);
+      context.drawImage(images["carrot"], canvas.width/5*4, canvas.height/6*2);
+      context.drawImage(images["mushroom"], canvas.width/5*4, canvas.height/6*3);
+      context.drawImage(images["meat"], canvas.width/5*4, canvas.height/6*4);
+      context.drawImage(images["onion"], canvas.width/5*4, canvas.height/6*5);
+    }
+  }
+}
+*/
+
+// canvasにイベント登録
+canvas.addEventListener('mousedown', function(e){mouseDown(e);}, false);
+canvas.addEventListener('mousemove', function(e){mouseMove(e);}, false);
+canvas.addEventListener('mouseup',   function(e){mouseUp(e);},   false);
+canvas.addEventListener('mouseout',  function(e){mouseOut(e);},  false);
