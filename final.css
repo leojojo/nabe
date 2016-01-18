@@ -2,11 +2,36 @@
 body, html {
   width:100%;
   height:100%;
-  margin 0;
-  padding 0;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
 }
-
 #canvas {
-  position:absolute;
+  position: absolute;
+}
+
+.pager {
+  background-color: white;
+  outline: none;
+  width: 0px;
+  height: 0px;
+  position: relative;
+  border: 0 solid transparent;
+  border-radius: 5px;
+  border-top-width: 20px;
+  border-bottom-width: 20px;
+  left: 90%;
+  top: 90%;
+}
+#left {
+  border-left: 45px solid brown;
+}
+#right {
+  border-right:45px solid brown;
+}
+#left:hover {
+  background-color: orange;
+}
+#right:hover {
+  background-color: orange;
 }

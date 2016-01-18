@@ -6,7 +6,7 @@ var Y = {};
 var context = document.getElementById('canvas').getContext("2d");
 var totalResources = 5;
 var loadedCounter = 0;
-var fps = 30;
+var fps = 20;
 
 var srcs = [
   "tofu",
@@ -25,7 +25,7 @@ for (i in srcs){
   images[i].onload = function() { 
     loadedCounter += 1;
     if(loadedCounter === totalResources) {
-      setInterval(redraw, 1000 / fps);
+      var init = setInterval(redraw, 1000 / fps);
     }
   }
   images[i].src = "images/" + srcs[i] + ".png";
@@ -56,9 +56,9 @@ function drawDefault(){
   // clears canvas
   //context.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawSoup(canvas.width/5*2, canvas.height/2, 1200, 600, String("linen"));
+  drawSoup(canvas.width/5*2, canvas.height/10*6, 1200, 500, String("linen"));
   for (i in images){
-    defaultX[i] = canvas.width/5*4;
+    defaultX[i] = canvas.width/10*9;
     defaultY[i] = canvas.height/6*i;
 
     context.drawImage(images[i], defaultX[i], defaultY[i]);
@@ -90,6 +90,7 @@ var mouseDown = function(e) {
        ) {
       dragTarget = i;
       isDragging = true;
+      var intervalId = setInterval(redraw, 1000 / fps);
       console.log("down: " + dragTarget);
       break;
     }
@@ -100,6 +101,7 @@ var mouseDown = function(e) {
 var mouseUp = function(e) {
   isDragging = false;
   dragTarget = null;
+  //clearInterval(intervalId);
 };
 
 // end drag on mouse out of canvas
