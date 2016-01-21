@@ -7,7 +7,6 @@ var context = document.getElementById('canvas').getContext("2d");
 var numResources = 5;
 var loadedCounter = 0;
 var fps = 20;
-var set = 0;
 
 var food = [
   "tofu",
@@ -16,21 +15,32 @@ var food = [
   "onion",
   "mushroom"
 ];
+var chaos = [
+  "orange",
+  "jello",
+  "sushi",
+  "pizza",
+  "octopus"
+];
 var organs = [
   "brain",
-  "lung",
+  "liver",
   "heart",
   "eye",
-  "hand"
+  "arm"
 ];
-var srcs = [food, organs];
+var srcs = [food, chaos, organs];
+var srcid = 0;
+
+var pot ={};
 
 var isDragging = false;
 var dragTarget = null;
 
 //initial loading
-function init(srcs) {
-  for (i in srcs){
+function init(srcid) {
+  console.log(srcs[Number(srcid)]);
+  for (i in srcs[Number(srcid)]){
     images[i] = new Image();
     images[i].onload = function() {
       loadedCounter += 1;
@@ -38,14 +48,25 @@ function init(srcs) {
         var init = setInterval(redraw, 1000 / fps);
       }
     }
-    images[i].src = "images/" + srcs[i] + ".png";
-//console.log(i + srcs[i] + images[i].src);
+    images[i].src = "images/" + srcs[Number(srcid)][i] + ".png";
+    //console.log(i + srcs[i] + images[i].src);
   }
 }
 
-function changeImg() {
-  set = (set >= srcs.length) ? 0 : set + 1;
-  init(srcs[set]);
+function changeImg(dir) {
+  console.log(srcs.length);
+  switch (srcid) {
+    case srcs.length - 1:
+      srcid = 0;
+      break;
+    case (srcid == 0):
+      srcid = srcs.length - 1;
+      break;
+    default:
+      srcid += dir;
+      break;
+  }
+  init(srcid);
 }
 
 function drawSoup(centerX, centerY, width, height, color) {
@@ -73,15 +94,16 @@ function drawDefault() {
   context.clearRect(0, 0, canvas.width, canvas.height);
 
   drawSoup(canvas.width/5*2, canvas.height/10*6, 1200, 500, String("linen"));
-  for (i in images){
+  for (i in images) {
     defaultX[i] = canvas.width/10*9;
     defaultY[i] = canvas.height/6*i;
+    //context.drawImage(images[i], X[dragTarget], Y[dragTarget]);
   }
 }
 
 function redraw() {
   drawDefault();
-  for (i in images){
+  for (i in images) {
     if (i != dragTarget){
       X[i] = defaultX[i];
       Y[i] = defaultY[i];
@@ -104,7 +126,7 @@ var mouseDown = function(e) {
          ) {
         dragTarget = i;
         isDragging = true;
-        var intervalId = setInterval(redraw, 1000 / fps);
+        //var intervalId = setInterval(redraw, 1000 / fps);
         console.log("down: " + dragTarget);
         break;
       }
@@ -113,10 +135,14 @@ var mouseDown = function(e) {
 
 // end drag
 var mouseUp = function(e) {
-  //if (X[dragTaget] = hittest nabe)
+  if (context.isPointInPath(X[dragTarget], Y[dragTarget])){
+    defaultX[dragTarget] = X[dragTarget];
+    defaultY[dragTarget] = Y[dragTarget];
+    console.log(nabe[srcs[srcid][dragTarget]]);
+  }
+  //clearInterval(intervalId);
   isDragging = false;
   dragTarget = null;
-  clearInterval(intervalId);
 };
 
 // end drag on mouse out of canvas
@@ -146,7 +172,7 @@ var mouseMove = function(e) {
   }
 }
 
-init(food);
+init(srcid);
 
 // make canvas listen for events (can add multiple events unlike HTML)
 canvas.addEventListener('mousedown', function(e){mouseDown(e);}, false);

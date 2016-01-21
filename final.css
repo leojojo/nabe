@@ -30,8 +30,14 @@ body, html {
   border-right:45px solid brown;
 }
 #left:hover {
-  background-color: orange;
+  border-left-color: red;
 }
 #right:hover {
-  background-color: orange;
+  border-right-color: red;
+}
+#left:active {
+  border-left-color: orange;
+}
+#right:active {
+  border-right-color: orange;
 }
