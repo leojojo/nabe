@@ -35,3 +35,9 @@ body, html {
 #right:hover {
   background-color: orange;
 }
+#left:active {
+  border-left-color: orange;
+}
+#right:active {
+  border-right-color: orange;
+}
