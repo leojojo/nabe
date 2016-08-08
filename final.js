@@ -66,7 +66,7 @@ function changeImg(dir) {
     case -1:
     srcid = srcs.length - 1;
     break;
-    case 3:
+    case srcs.length:
     srcid = 0;
     break;
   }
@@ -123,7 +123,8 @@ function redraw() {
     }
   }
   for (i in nabe) {
-    context.drawImage(nabe[i], X[i], Y[i]);
+    console.log(soupColor);
+    context.drawImage(nabe[i], canvas.width/5 + 50*i - Math.floor(Math.random()*(95-soupColor)/5), canvas.height/10 + 50*i - Math.floor(Math.random()*(95-soupColor)/5));
   }
 }
 
@@ -134,18 +135,50 @@ var mouseUp = function(e) {
     defaultX[dragTarget] = X[dragTarget];
     defaultY[dragTarget] = Y[dragTarget];
     nabesrc.push(srcs[srcid][dragTarget]);
-    //console.log(nabe);
+    console.log("nabe "+nabe);
+    console.log("srcs[srcid] "+srcs[srcid]);
+    console.log("dragTarget "+dragTarget);
+    console.log("srcs[srcid][dragTarget] "+srcs[srcid][dragTarget]);
     soupColor -= srcid * 10;
-  }
+    if (soupColor <= 0) {
+      soupColor = 0;
+    }
+  };
   
   //clearInterval(intervalId);
   isDragging = false;
   dragTarget = null;
-};
+  init(srcid);
+}
+
+// begin drag
+var touchStart = function(e) {
+  //console.log("e: " + e);
+  //console.log("e.touches[0]: " + e.touches[0]);
+  //console.log("e.touches[0].client: " + e.touches[0].clientX + ", " + e.touches[0].clientY);
+  for (i in images) {
+    //console.log(images[i] + X[i] + Y[i]);
+    //console.log("natural: " + images[i].naturalWidth + images[i].naturalHeight)
+      // hit check whether cursor is on the image
+      if (e.touches[0].clientX >= X[i] &&
+        e.touches[0].clientX <= (X[i] + images[i].naturalWidth) &&
+        e.touches[0].clientY >= Y[i] &&
+        e.touches[0].clientY <= (Y[i] + images[i].naturalHeight)
+        ) {
+        dragTarget = i;
+      isDragging = true;
+        //var intervalId = setInterval(redraw, 1000 / fps);
+        //console.log("down: " + dragTarget);
+        break;
+      }
+    }
+  };
 
 // begin drag
 var mouseDown = function(e) {
-  //console.log("mouse: " + e.clientX + ", " + e.clientY);
+  //console.log("e: " + e);
+  //console.log("e.touches[0]: " + e.touches[0]);
+  //console.log("e.touches[0].client: " + e.touches[0].clientX + ", " + e.touches[0].clientY);
   for (i in images) {
     //console.log(images[i] + X[i] + Y[i]);
     //console.log("natural: " + images[i].naturalWidth + images[i].naturalHeight)
@@ -162,12 +195,31 @@ var mouseDown = function(e) {
         break;
       }
     }
-  }
+  };
 
 // end drag on mouse out of canvas
 var mouseOut = function(e) {
   mouseUp(e);
-}
+};
+
+// during drag
+var touchMove = function(e) {
+  if (isDragging) {
+    for (var i in images) {
+      if (i == dragTarget) {
+        X[i] = e.touches[0].clientX - images[i].naturalWidth / 2;
+        Y[i] = e.touches[0].clientY - images[i].naturalHeight / 2;
+      }
+      else {
+        X[i] = defaultX[i];
+        Y[i] = defaultY[i];
+      }
+
+      //console.log(i + ": " + X[i] + ", " + Y[i]);
+      //context.drawImage(images[i], X[i], Y[i]);
+    }
+  }
+};
 
 // during drag
 var mouseMove = function(e) {
@@ -186,7 +238,7 @@ var mouseMove = function(e) {
       //context.drawImage(images[i], X[i], Y[i]);
     }
   }
-}
+};
 
 init(srcid);
 
@@ -195,3 +247,7 @@ canvas.addEventListener('mousedown', function(e){mouseDown(e);}, false);
 canvas.addEventListener('mousemove', function(e){mouseMove(e);}, false);
 canvas.addEventListener('mouseup',   function(e){mouseUp(e);},   false);
 canvas.addEventListener('mouseout',  function(e){mouseOut(e);},  false);
+
+canvas.addEventListener('touchstart', function(e){touchStart(e);}, false);
+canvas.addEventListener('touchmove', function(e){touchMove(e);}, false);
+canvas.addEventListener('touchend',   function(e){mouseUp(e);},   false);
