@@ -3,10 +3,10 @@ var defaultX = {};
 var defaultY = {};
 var X = {};
 var Y = {};
-var context = document.getElementById('canvas').getContext("2d");
+var context = document.getElementById('canvas').getContext('2d');
 var numResources = 5;
 var loadedCounter = 0;
-var fps = 20;
+var fps = 15;
 
 var food = [
   "tofu",
@@ -35,6 +35,8 @@ var srcid = 0;
 var nabesrc = []; // store names from srcs[srcid]
 var nabe = [];  // image object
 var soupColor = 95;
+var ingX = [];
+var ingY = [];
 
 var isDragging = false;
 var dragTarget = null;
@@ -46,7 +48,7 @@ function init(srcid) {
     images[i] = new Image();
     images[i].onload = function() {
       loadedCounter += 1;
-      if(loadedCounter === numResources) {
+      if (loadedCounter === numResources) {
         var init = setInterval(redraw, 1000 / fps);
       }
     }
@@ -106,7 +108,6 @@ function drawDefault(soupColor) {
   for (i in images) {
     defaultX[i] = canvas.width/10*9;
     defaultY[i] = canvas.height/6*i;
-    //context.drawImage(images[i], X[dragTarget], Y[dragTarget]);
   }
 }
 
@@ -119,12 +120,32 @@ function redraw() {
       context.drawImage(images[i], X[i], Y[i]); // stand-by ingredients size
     }
     else {    // ingredient currently being dragged
-      context.drawImage(images[i], X[i], Y[i]);
+      context.drawImage(images[i], X[i], Y[i]); // stand-by ingredients size
     }
   }
-  for (i in nabe) {
-    console.log(soupColor);
-    context.drawImage(nabe[i], canvas.width/5 + 50*i - Math.floor(Math.random()*(95-soupColor)/5), canvas.height/10 + 50*i - Math.floor(Math.random()*(95-soupColor)/5));
+  if (canvas.width >= 1024) {
+    for (i in nabe) {
+      var shake = Math.floor(Math.random()*(95-soupColor)/5);
+      context.drawImage(nabe[i], canvas.width/6 + ingX[i] - shake, canvas.height/5 + ingY[i] - shake, 150, 150);
+      //context.drawImage(nabe[i], 0, 0, 100, ingY[i]/4, canvas.width/4 + ingX[i] - shake, canvas.height/4 + ingY[i] - shake, 100, ingY[i]/4);
+      //context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
+    }
+  }
+  else if (canvas.width > 767) {
+    for (i in nabe) {
+      var shake = Math.floor(Math.random()*(95-soupColor)/5);
+      context.drawImage(nabe[i], canvas.width/4 + ingX[i] - shake, canvas.height/4 + ingY[i] - shake, 100, 100);
+      //context.drawImage(nabe[i], 0, 0, 100, ingY[i]/4, canvas.width/4 + ingX[i] - shake, canvas.height/4 + ingY[i] - shake, 100, ingY[i]/4);
+      //context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
+    }
+  }
+  else {
+    for (i in nabe) {
+      var shake = Math.floor(Math.random()*(95-soupColor)/5);
+      context.drawImage(nabe[i], canvas.width/10 + ingX[i]/5*2 - shake, canvas.height/4 + 75 + ingY[i]/7*2 - shake, 50, 50);
+      //context.drawImage(nabe[i], 0, 0, 100, ingY[i]/4, canvas.width/10 + ingX[i]/2 - shake, canvas.height/4 + 100 + ingY[i]/3 - shake, 50, ingY[i]/8);
+      //context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
+    }
   }
 }
 
@@ -144,8 +165,10 @@ var mouseUp = function(e) {
       soupColor = 0;
     }
   };
+
+  ingX.push(Math.floor(Math.random()*canvas.width/130)*50);  //0~400
+  ingY.push(Math.floor(Math.random()*canvas.height/120)*50);  //0~300
   
-  //clearInterval(intervalId);
   isDragging = false;
   dragTarget = null;
   init(srcid);
@@ -167,12 +190,10 @@ var touchStart = function(e) {
         ) {
         dragTarget = i;
       isDragging = true;
-        //var intervalId = setInterval(redraw, 1000 / fps);
-        //console.log("down: " + dragTarget);
-        break;
-      }
+      break;
     }
-  };
+  }
+};
 
 // begin drag
 var mouseDown = function(e) {
@@ -190,12 +211,10 @@ var mouseDown = function(e) {
         ) {
         dragTarget = i;
       isDragging = true;
-        //var intervalId = setInterval(redraw, 1000 / fps);
-        //console.log("down: " + dragTarget);
-        break;
-      }
+      break;
     }
-  };
+  }
+};
 
 // end drag on mouse out of canvas
 var mouseOut = function(e) {
@@ -214,9 +233,6 @@ var touchMove = function(e) {
         X[i] = defaultX[i];
         Y[i] = defaultY[i];
       }
-
-      //console.log(i + ": " + X[i] + ", " + Y[i]);
-      //context.drawImage(images[i], X[i], Y[i]);
     }
   }
 };
@@ -233,9 +249,6 @@ var mouseMove = function(e) {
         X[i] = defaultX[i];
         Y[i] = defaultY[i];
       }
-
-      //console.log(i + ": " + X[i] + ", " + Y[i]);
-      //context.drawImage(images[i], X[i], Y[i]);
     }
   }
 };
